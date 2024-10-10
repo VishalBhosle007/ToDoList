@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Enhanced To-Do List</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            background-color: #e9ecef;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            height: calc(100vh - 40px);
+            display: flex;
+        }
+
+        .input-section {
+            flex: 0 0 40%;
+            padding: 30px;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            /* Enable scrolling */
+            max-height: calc(100vh - 40px);
+            /* Adjust max height */
+        }
+
+        .tabs-section {
+            flex: 1;
+            padding: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #343a40;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .task-status {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .description {
+            cursor: pointer;
+            color: #495057;
+        }
+
+        .description:hover {
+            text-decoration: underline;
+        }
+
+        .edit-description {
+            display: none;
+        }
+
+        .list-group-item {
+            border: none;
+            padding: 15px;
+            border-bottom: 1px solid #f1f1f1;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dark-mode {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+
+        .btn {
+            width: 90%;
+            margin-top: 0px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .add-task-btn {
+            width: auto;
+            padding: 5px 10px;
+            /* Reduced padding */
+            margin-top: 5px;
+        }
+
+        .no-tasks {
+            text-align: center;
+            color: #868e96;
+        }
+
+        .form-group label {
+            color: black;
+            /* Set label color to black */
+        }
+
+        .task-button {
+            padding: 4px 8px;
+            /* Reduced padding */
+            font-size: 14px;
+            /* Adjust font size if needed */
+            width: auto;
+        }
+
+        .btn {
+            min-width: 10px;
+            /* Ensures minimum width */
+            margin-top: 5px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #darkModeToggle,
+        #downloadExcelBtn {
+            width: auto;
+        }
+
+        a {
+            color: rgba(57, 61, 182, 0.986);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                /* Stack elements vertically */
+            }
+
+            .input-section {
+                flex: none;
+                /* Remove flex properties */
+                border-right: none;
+                /* Remove border */
+                margin-bottom: 20px;
+                /* Add space between sections */
+                padding: 20px;
+                /* Adjust padding for mobile */
+            }
+
+            .tabs-section {
+                flex: none;
+                /* Remove flex properties */
+                padding: 20px;
+                /* Adjust padding for mobile */
+            }
+
+            .input-section h1 {
+                font-size: 1.5rem;
+                /* Make title smaller for mobile */
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+                /* Adjust label font size for mobile */
+            }
+
+            .btn {
+                width: 100%;
+                /* Make buttons full width */
+            }
+        }
+
+
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+                /* Allow vertical scrolling for the entire page on mobile */
+            }
+
+            .container {
+                height: auto;
+                /* Allow the container height to adjust based on content */
+            }
+
+            .input-section,
+            .tabs-section {
+                overflow-y: auto;
+                /* Allow scrolling within each section */
+                max-height: calc(100vh - 40px);
+                /* Maintain overall height constraints */
+            }
+
+            .input-section {
+                margin-bottom: 20px;
+                /* Space between sections */
+            }
+
+            .tabs-section {
+                margin-top: 20px;
+                /* Space between input and tabs */
+            }
+
+            .input-section h1 {
+                font-size: 1.5rem;
+                /* Adjust title size */
+            }
+
+            .btn {
+                width: 100%;
+                /* Make buttons full width */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="input-section">
+            <h1>My Enhanced To-Do List</h1>
+            <div class="form-group">
+                <label for="taskInput">Task</label>
+                <div class="input-group mb-3">
+                    <input type="text" id="taskInput" class="form-control" placeholder="Add a new task..." required>
+                    <div class="input-group-append">
+                        <button id="addTaskBtn" style="margin-top: 0;" class="btn btn-success add-task-btn">Add</button>
+                        <!-- Changed text -->
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="taskDescriptionInput">Description</label>
+                <textarea id="taskDescriptionInput" class="form-control"
+                    placeholder="Add a description (optional)..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="assignedByInput">Assigned By</label>
+                <input type="text" id="assignedByInput" class="form-control" required placeholder="Assigned By...">
+            </div>
+            <div class="form-group">
+                <label for="assignedToInput">Assigned To</label>
+                <input type="text" id="assignedToInput" class="form-control" placeholder="Assigned To...">
+            </div>
+            <div class="form-group">
+                <label for="assignedDateInput">Assigned Date</label>
+                <input type="datetime-local" id="assignedDateInput" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="dueDateInput">Due Date</label>
+                <input type="date" id="dueDateInput" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="categoryInput">Category</label>
+                <select id="categoryInput" class="form-control">
+                    <option value="">Select Category</option>
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tabs-section">
+            <ul class="nav nav-tabs" id="taskTabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="todo-tab" data-toggle="tab" href="#todo" role="tab"
+                        aria-controls="todo" aria-selected="true">Pending Tasks <span id="todoCount"
+                            class="badge badge-light">0</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="inProgress-tab" data-toggle="tab" href="#inProgress" role="tab"
+                        aria-controls="inProgress" aria-selected="false">In Progress <span id="inProgressCount"
+                            class="badge badge-light">0</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="completed-tab" data-toggle="tab" href="#completed" role="tab"
+                        aria-controls="completed" aria-selected="false">Completed <span id="completedCount"
+                            class="badge badge-light">0</span></a>
+                </li>
+            </ul>
+            <div class="tab-content" id="taskTabContent">
+                <div class="tab-pane fade show active" id="todo" role="tabpanel" aria-labelledby="todo-tab">
+                    <ul id="todoList" class="list-group"></ul>
+                    <div id="noTodoMessage" class="no-tasks" style="display: none;">No tasks added yet!</div>
+                </div>
+                <div class="tab-pane fade" id="inProgress" role="tabpanel" aria-labelledby="inProgress-tab">
+                    <ul id="inProgressList" class="list-group"></ul>
+                </div>
+                <div class="tab-pane fade" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+                    <ul id="completedList" class="list-group"></ul>
+                </div>
+            </div>
+            <button id="darkModeToggle" class="btn btn-secondary btn-sm mt-3">Toggle Dark Mode</button>
+            <button id="downloadExcelBtn" class="btn btn-info btn-sm mt-3">Download Excel</button>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const todoList = document.getElementById('todoList');
+        const inProgressList = document.getElementById('inProgressList');
+        const completedList = document.getElementById('completedList');
+        const noTodoMessage = document.getElementById('noTodoMessage');
+        const todoCount = document.getElementById('todoCount');
+        const inProgressCount = document.getElementById('inProgressCount');
+        const completedCount = document.getElementById('completedCount');
+
+        function loadTasks() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            clearCounts();
+            tasks.forEach(task => addTaskToDOM(task));
+            updateTaskCounts(tasks);
+        }
+
+        function clearCounts() {
+            todoCount.textContent = '0';
+            inProgressCount.textContent = '0';
+            completedCount.textContent = '0';
+        }
+
+        function updateTaskCounts(tasks) {
+            const todoTasks = tasks.filter(task => task.status === 'todo').length;
+            const inProgressTasks = tasks.filter(task => task.status === 'inProgress').length;
+            const completedTasks = tasks.filter(task => task.status === 'completed').length;
+
+            todoCount.textContent = todoTasks;
+            inProgressCount.textContent = inProgressTasks;
+            completedCount.textContent = completedTasks;
+
+            noTodoMessage.style.display = todoTasks ? 'none' : 'block';
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        function addTaskToDOM({ text, description, assignedBy, assignedTo, assignedDate, dueDate, status }) {
+            const li = document.createElement('li');
+            li.className = 'list-group-item';
+            li.innerHTML =
+                `<span class="task-status">${text}</span><br>
+                <span class="description" onclick="toggleEditDescription(this)">${description || 'No description provided.'}</span>
+                <div class="edit-description">
+                    <textarea class="form-control mt-2" style="display:none;"></textarea>
+                    <button class="btn btn-primary btn-sm saveDescriptionBtn" style="display:none;">Save</button>
+                </div>
+                <div>
+                    <span><strong>Assigned By:</strong> ${assignedBy || 'N/A'}</span><br>
+                    <span><strong>Assigned To:</strong> ${assignedTo || 'N/A'}</span><br>
+                    <span><strong>Assigned Date:</strong> ${assignedDate ? formatDate(assignedDate) : 'N/A'}</span><br>
+                    <span><strong>Due Date:</strong> ${dueDate ? formatDate(dueDate) : 'N/A'}</span><br>
+                </div>
+                <div>
+                    ${status === 'todo' ?
+                    `<button class="btn btn-warning task-button inProgressBtn">In Progress</button>
+                        <button class="btn btn-danger task-button deleteBtn">Delete</button>` : ''}
+                    ${status === 'inProgress' ?
+                    `<button class="btn btn-success task-button completeBtn">Complete</button>
+                        <button class="btn btn-danger task-button deleteBtn">Delete</button>` : ''}
+                    ${status === 'completed' ?
+                    `<button class="btn btn-secondary task-button reopenBtn">Reopen</button>
+                        <button class="btn btn-danger task-button deleteBtn">Delete</button>` : ''}
+                </div>`;
+
+            // Append the task to the appropriate list
+            if (status === 'todo') {
+                todoList.appendChild(li);
+            } else if (status === 'inProgress') {
+                inProgressList.appendChild(li);
+            } else if (status === 'completed') {
+                completedList.appendChild(li);
+            }
+
+            // Add event listeners
+            li.querySelector('.inProgressBtn')?.addEventListener('click', function () {
+                moveTaskToInProgress(text);
+                li.remove(); // Remove from current list
+            });
+
+            li.querySelector('.completeBtn')?.addEventListener('click', function () {
+                completeTask(text);
+                li.remove();
+            });
+
+            li.querySelector('.reopenBtn')?.addEventListener('click', function () {
+                reopenTask(text);
+                li.remove();
+            });
+
+            li.querySelector('.deleteBtn').addEventListener('click', function () {
+                deleteTask(text);
+                li.remove();
+            });
+
+            li.querySelector('.saveDescriptionBtn').addEventListener('click', function () {
+                const newDescription = li.querySelector('.edit-description textarea').value;
+                saveDescription(text, newDescription);
+                li.querySelector('.description').textContent = newDescription || 'No description provided.';
+                li.querySelector('.edit-description').style.display = 'none';
+            });
+        }
+
+        function toggleEditDescription(descriptionElement) {
+            const editContainer = descriptionElement.nextElementSibling;
+            const textarea = editContainer.querySelector('textarea');
+            const saveButton = editContainer.querySelector('.saveDescriptionBtn');
+
+            if (textarea.style.display === "none" || textarea.style.display === "") {
+                textarea.style.display = "block";
+                saveButton.style.display = "block";
+                textarea.value = descriptionElement.textContent; // Load current description
+            } else {
+                textarea.style.display = "none";
+                saveButton.style.display = "none";
+            }
+        }
+
+        function addTask() {
+            const text = document.getElementById('taskInput').value;
+            const description = document.getElementById('taskDescriptionInput').value;
+            const assignedBy = document.getElementById('assignedByInput').value;
+            const assignedTo = document.getElementById('assignedToInput').value;
+            const assignedDate = document.getElementById('assignedDateInput').value;
+            const dueDate = document.getElementById('dueDateInput').value;
+            const category = document.getElementById('categoryInput').value;
+
+            if (text) {
+                const task = { text, description, assignedBy, assignedTo, assignedDate, dueDate, category, status: 'todo' };
+                const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                tasks.push(task);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                addTaskToDOM(task);
+                updateTaskCounts(tasks);
+                clearInputs();
+                noTodoMessage.style.display = 'none';
+            }
+        }
+
+        function clearInputs() {
+            document.getElementById('taskInput').value = '';
+            document.getElementById('taskDescriptionInput').value = '';
+            document.getElementById('assignedByInput').value = '';
+            document.getElementById('assignedToInput').value = '';
+            document.getElementById('assignedDateInput').value = '';
+            document.getElementById('dueDateInput').value = '';
+            document.getElementById('categoryInput').value = '';
+        }
+
+        function moveTaskToInProgress(text) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskIndex = tasks.findIndex(t => t.text === text);
+            if (taskIndex >= 0) {
+                tasks[taskIndex].status = 'inProgress';
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                addTaskToDOM(tasks[taskIndex]); // Add to DOM
+                updateTaskCounts(tasks);
+            }
+        }
+
+        function completeTask(text) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskIndex = tasks.findIndex(t => t.text === text);
+            if (taskIndex >= 0) {
+                tasks[taskIndex].status = 'completed';
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                addTaskToDOM(tasks[taskIndex]); // Add to DOM
+                updateTaskCounts(tasks);
+            }
+        }
+
+        function reopenTask(text) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskIndex = tasks.findIndex(t => t.text === text);
+            if (taskIndex >= 0) {
+                tasks[taskIndex].status = 'todo';
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                addTaskToDOM(tasks[taskIndex]); // Add to DOM
+                updateTaskCounts(tasks);
+            }
+        }
+
+        function saveDescription(text, newDescription) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskIndex = tasks.findIndex(t => t.text === text);
+            if (taskIndex >= 0) {
+                tasks[taskIndex].description = newDescription;
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+            }
+        }
+
+        function deleteTask(text) {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const updatedTasks = tasks.filter(task => task.text !== text);
+            localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+            updateTaskCounts(updatedTasks);
+        }
+
+        document.getElementById('addTaskBtn').addEventListener('click', addTask);
+        document.getElementById('darkModeToggle').addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        document.getElementById('downloadExcelBtn').addEventListener('click', function () {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Task,Description,Assigned By,Assigned To,Assigned Date,Due Date,Category,Status\n";
+            tasks.forEach(task => {
+                const row = `${task.text},${task.description || ''},${task.assignedBy || ''},${task.assignedTo || ''},${task.assignedDate || ''},${task.dueDate || ''},${task.category || ''},${task.status}\n`;
+                csvContent += row;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "tasks.csv");
+            document.body.appendChild(link);
+
+            link.click();
+            document.body.removeChild(link);
+        });
+        function setDefaultDates() {
+            const now = new Date();
+            const formattedDate = now.toISOString().slice(0, 16); // For datetime-local
+            const formattedDateOnly = now.toISOString().slice(0, 10); // For date
+
+            document.getElementById('assignedDateInput').value = formattedDate;
+            document.getElementById('dueDateInput').value = formattedDateOnly;
+        }
+
+        function loadTasks() {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            clearCounts();
+            tasks.forEach(task => addTaskToDOM(task));
+            updateTaskCounts(tasks);
+            setDefaultDates(); // Call to set default dates
+        }
+
+        window.onload = function () {
+            loadTasks();
+            setDefaultDates(); // Ensure default dates are set
+        };
+
+        window.onload = loadTasks;
+    </script>
+</body>
+
+</html>
